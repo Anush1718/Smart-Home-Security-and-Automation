@@ -1,0 +1,43 @@
+#include <SoftwareSerial.h>
+#include<Servo.h>
+SoftwareSerial BTSerial(5, 6); // RX | TX
+
+int servo=5;
+Servo servoval;
+const int trigPin = 11;
+const int echoPin = 12;
+int led=13;
+float duration, distance;
+
+void setup() {
+  pinMode(trigPin, OUTPUT);
+  pinMode(echoPin, INPUT);
+  Serial.begin(9600);
+  servoval.attach(servo);
+  BTSerial.begin(9600); // Set the Bluetooth module baud rate to 9600
+}
+
+void loop() {
+  digitalWrite(trigPin, LOW);
+  delayMicroseconds(2);
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(10); 
+  digitalWrite(trigPin, LOW);
+  
+  duration = pulseIn(echoPin, HIGH);
+  distance = duration * 0.034 / 2;
+  if(distance<110){
+    digitalWrite(led,HIGH);
+    delay(500);
+    Serial.write("Alert");
+    if(Serial.available()>0){
+    char data=BTSerial.read();
+    BTSerial.write(data);}
+    digitalWrite(led,LOW);
+    delay(500);
+    servoval.write(180);
+  }
+  else{
+    digitalWrite(led,LOW);
+  }
+}
